@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "module": "commonjs",
+      "sourceMap": false,
+      "noEmitOnError": true,
+      "noImplicitAny": true,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "outDir": "dist"
+    },
+    "include": [
+        "node_modules/pixi.js/index.d.ts",
+        "src"
+    ]
+}
