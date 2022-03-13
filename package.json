@@ -19,6 +19,7 @@
   "homepage": "https://github.com/merkulovsa/sorting-game#readme",
   "dependencies": {
     "@types/offscreencanvas": "^2019.6.4",
+    "p2": "^0.7.1",
     "pixi.js": "^6.2.2"
   },
   "devDependencies": {
