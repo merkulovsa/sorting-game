@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import { Container } from "pixi.js"
 
 const p2 = require("p2")
 
@@ -20,10 +20,10 @@ export class PhysicsContainer {
     private static _world: p2.World
 
 
-    readonly container: PIXI.Container
+    readonly container: Container
     readonly body: p2.Body
 
-    constructor(container: PIXI.Container, body: p2.Body) {
+    constructor(container: Container, body: p2.Body) {
         this.container = container
         this.body = body
 
