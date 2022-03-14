@@ -8,129 +8,258 @@ const p2 = require("p2")
 
 export interface LevelSettings {
     groups: LevelGroup[]
-    random?: boolean
+    impulseAcc: number
+    shuffle?: boolean
     cycle?: boolean
 }
 
-export enum LevelColor {
-    Red = 0,
-    Green = 1,
-    Blue = 2,
+export enum DotColor {
+    Red = 0xFF0000,
+    Green = 0x00FF00,
+    Blue = 0x0000FF,
 }
 
 export interface LevelGroup {
     amount: number
+    delayTime?: number
     deltaTime: number
-    colors: LevelColor[]
-    zones: Array<{start: number, end?: number}>
+    colors: DotColor[]
+    colorWeights?: number[]
+    leftColor: DotColor
+    rightColor: DotColor
+    zones: Array<{ start: number, end?: number }>
     impulse?: number
 }
 
-export class LevelController {
-    private static tints: {[key: number]: number} = {
-        0: 0xFF0000,
-        1: 0x00FF00,
-        2: 0x0000FF,
+abstract class LevelObject {
+    readonly physicsContainer: PhysicsContainer
+    readonly sprite: Sprite
+
+    protected constructor(physicsContainer: PhysicsContainer) {
+        this.physicsContainer = physicsContainer
+        this.sprite = <Sprite>this.physicsContainer.container
     }
 
+    abstract start(...args: any[]): void
+
+    abstract stop(...args: any[]): void
+}
+
+class Dot extends LevelObject {
+    constructor(physicsContainer: PhysicsContainer) {
+        super(physicsContainer)
+
+        this.sprite.visible = false
+    }
+
+    get color(): DotColor {
+        return this.sprite.tint
+    }
+
+    set color(value: DotColor) {
+        this.sprite.tint = value
+    }
+
+    get isOffScreen(): boolean {
+        return this.sprite.x > window.app.screen.bottom
+    }
+
+    start(x: number, y: number, impulse: number = 0): void {
+        this.physicsContainer.body.position = [x, y]
+        this.physicsContainer.body.velocity = [0, 0]
+        this.physicsContainer.body.angularVelocity = 0
+        this.physicsContainer.body.angle = 0
+        this.physicsContainer.update()
+        this.physicsContainer.start()
+
+        impulse && this.physicsContainer.body.applyImpulse([0, impulse])
+
+        this.sprite.visible = true
+    }
+
+    stop(): void {
+        this.physicsContainer.stop()
+
+        this.sprite.visible = false
+    }
+}
+
+class Wall extends LevelObject {
+    constructor(sprite: Sprite) {
+        const body: p2.Body = new p2.Body({
+            type: p2.Body.STATIC,
+            position: [sprite.x, sprite.y]
+        })
+        body.addShape(
+            new p2.Box({ width: sprite.width, height: sprite.height }),
+            [(sprite.anchor.x - 0.5) * sprite.width, (0.5 - sprite.anchor.y) * sprite.height]
+        )
+
+        super(new PhysicsContainer(sprite, body))
+    }
+
+    start(): void {
+        this.physicsContainer.start()
+    }
+
+    stop(): void {
+        this.physicsContainer.stop()
+    }
+}
+
+export class LevelController {
     private readonly container: Container
     private readonly settings: LevelSettings
-    private readonly spawner: Pool<PhysicsContainer>
+    private readonly spawner: Pool<Dot>
 
+    private groups: LevelGroup[]
     private groupIndex: number
     private amount: number
+    private _balance: number
+    private delayTime: number
+    private deltaTime: number
     private time: number
+    private impulse: number
     private stopped: boolean
-    private items: PhysicsContainer[]
-    private onComplete: () => void
+    private dots: Dot[]
+    private walls: Wall[]
+    private onPassed: () => void
+    private onFailed: () => void
 
-    constructor(container: Container, settings: LevelSettings) {
+    constructor(settings: LevelSettings, container: Container, walls: Sprite[]) {
         this.container = container
         this.settings = settings
-        this.spawner = new Pool(() => this.create())
+        this.spawner = new Pool(() => this.createDot())
+        this.groups = this.settings.groups.slice()
         this.groupIndex = 0
         this.amount = 0
+        this._balance = 0
+        this.delayTime = 0
+        this.deltaTime = 0
         this.time = 0
+        this.impulse = 0
         this.stopped = true
-        this.items = []
-
-        const wallLeftBody: p2.Body = new p2.Body({
-            type: p2.Body.STATIC,
-            position: [Designer.wallLeft.x, Designer.wallLeft.y]
-        })
-        wallLeftBody.addShape(new p2.Box({width: Designer.wallLeft.width, height: Designer.wallLeft.height}))
-        new PhysicsContainer(Designer.wallLeft, wallLeftBody).start()
-
-        const wallCenterBody: p2.Body = new p2.Body({
-            type: p2.Body.STATIC,
-            position: [Designer.wallCenter.x, Designer.wallCenter.y]
-        })
-        wallCenterBody.addShape(new p2.Box({width: Designer.wallCenter.width, height: Designer.wallCenter.height}))
-        new PhysicsContainer(Designer.wallCenter, wallCenterBody).start()
-
-        const wallRightBody: p2.Body = new p2.Body({
-            type: p2.Body.STATIC,
-            position: [Designer.wallRight.x, Designer.wallRight.y]
-        })
-        wallRightBody.addShape(new p2.Box({width: Designer.wallRight.width, height: Designer.wallRight.height}))
-        new PhysicsContainer(Designer.wallRight, wallRightBody).start()
-
-        const hoodBody: p2.Body = new p2.Body({
-            type: p2.Body.STATIC,
-            position: [Designer.hood.x, Designer.hood.y]
-        })
-        hoodBody.addShape(new p2.Box({width: Designer.hood.width, height: Designer.hood.height}), [0, -Designer.hood.height / 2])
-        new PhysicsContainer(Designer.hood, hoodBody).start()
+        this.dots = []
+        this.walls = walls.map((value) => new Wall(value))
     }
 
-    start(onComplete: () => void): void {
-        this.groupIndex = 0
-        this.amount = this.currentGroup.amount
-        this.time = Date.now()
+    start(onPassed?: () => void, onFailed?: () => void, cycle?: boolean): void {
+        if (this.settings.shuffle) {
+            this.groups = MathUtils.shuffle(this.groups)
+        }
+
+        if (!cycle) {
+            this.balance = 0
+            this.impulse = 0
+        }
+
+        this.walls.forEach(
+            (value) => value.start()
+        )
+
+        this.groupIndex = -1
         this.stopped = false
-        this.onComplete = onComplete
+        this.onPassed = onPassed
+        this.onFailed = onFailed
+
+        this.nextGroup()
     }
 
     stop(): void {
         this.stopped = true
+
+        this.walls.forEach(
+            (value) => value.stop()
+        )
     }
 
     update(): void {
-        if (!this.isCompleted && !this.stopped) {
+        const oofScreenDots: Dot[] = this.getOffScreenDots()
+        oofScreenDots.forEach(
+            (value) => {
+                if (value.sprite.x < window.app.screen.width / 2) {
+                    this.balance += value.color === this.leftColor ? 1 : -1
+                } else {
+                    this.balance += value.color === this.rightColor ? 1 : -1
+                }
+
+                value.stop()
+
+                this.spawner.put(value)
+            },
+        )
+
+        const now: number = Date.now()
+        const passed: boolean = this.passed
+
+        this.impulse += this.settings.impulseAcc * (now - this.time)
+        this.time = now
+
+        if (!passed && !this.stopped) {
             if (this.amount === 0) {
-                this.groupIndex += 1
-                this.amount = this.currentGroup.amount
+                if (this.delayTime === -1) {
+                    this.delayTime = Date.now()
+                } else if (now - this.delayTime > this.currentGroup.delayTime) {
+                    this.nextGroup()
+                }
             }
 
-            const now: number = Date.now()
-            
-            if (now - this.time > this.currentGroup.deltaTime) {
-                this.drop()
-                this.time = now
+            if (now - this.deltaTime > this.currentGroup.deltaTime) {
+                this.startDot()
+                this.deltaTime = now
             }
-        } else if (this.isCompleted && !this.stopped) {
+        } else if (passed && !this.stopped) {
+            if (this.settings.cycle) {
+                this.start(this.onPassed, this.onFailed, true)
+            } else {
+                this.stopped = true
+                this.onPassed && this.onPassed()
+            }
+        } else if (!passed && this.stopped) {
             this.stopped = true
-            this.onComplete && this.onComplete()
+            this.onFailed && this.onFailed()
         }
-
-        this.checkOffScreen()
     }
 
-    private get isCompleted(): boolean {
+    private get passed(): boolean {
         return this.groupIndex === this.settings.groups.length - 1 && this.amount === 0
     }
 
     private get currentGroup(): LevelGroup {
-        return this.settings.groups[this.groupIndex]
+        return this.groups[this.groupIndex]
     }
 
-    private create(): PhysicsContainer {
+    private get leftColor(): DotColor {
+        return Designer.leftColor.tint
+    }
+
+    private set leftColor(value: DotColor) {
+        Designer.leftColor.tint = value
+    }
+
+    private get rightColor(): DotColor {
+        return Designer.rightColor.tint
+    }
+
+    private set rightColor(value: DotColor) {
+        Designer.rightColor.tint = value
+    }
+
+    private get balance(): number {
+        return this._balance
+    }
+
+    private set balance(value: number) {
+        this._balance = value
+        Designer.balanceText.text = value.toString()
+    }
+
+    private createDot(): Dot {
         const sprite: Sprite = Sprite.from(window.loader.resources["./assets/sphere_white.png"].texture)
         sprite.anchor.set(0.5)
         sprite.width = window.app.screen.width / 10
         sprite.height = window.app.screen.width / 10
-        sprite.visible = false
-
+        sprite.zIndex = 0
         this.container.addChild(sprite)
 
         const body: p2.Body = new p2.Body({
@@ -138,56 +267,46 @@ export class LevelController {
             mass: 1,
             position: [0, 0],
         })
-        body.addShape(new p2.Circle({radius: sprite.width / 2}))
+        body.addShape(new p2.Circle({ radius: sprite.width / 2 }))
 
-        return new PhysicsContainer(sprite, body)
+        return new Dot(new PhysicsContainer(sprite, body))
     }
 
-    private drop(): void {
-        for (const zone of this.currentGroup.zones) {
-            const item: PhysicsContainer = this.spawner.get()
-            const itemIndex: number = this.items.indexOf(item)
+    private startDot(): void {
+        for (const zone of this.currentGroup.zones.slice(0, this.amount)) {
+            const dot: Dot = this.spawner.get()
 
-            if (itemIndex === -1) {
-                this.items.push(item)
+            if (this.currentGroup.colorWeights) {
+                dot.color = MathUtils.randomWeightedValue(this.currentGroup.colors, this.currentGroup.colorWeights)
+            } else {
+                dot.color = MathUtils.randomValue(this.currentGroup.colors)
             }
-            
-            const sprite: Sprite = <Sprite> item.container
-            const tintIndex: number = this.currentGroup.colors[MathUtils.randomIntBetween(0, this.currentGroup.colors.length)]
-            sprite.tint = LevelController.tints[tintIndex]
-            sprite.visible = true
 
-            item.body.velocity = [0, 0]
-            item.body.angularVelocity = 0
-            item.body.position[0] = MathUtils.randomBetween(zone.start, zone.end || zone.start)
-            item.body.position[1] = -sprite.height / 2
-            item.body.angle = 0
+            const dotIndex: number = this.dots.indexOf(dot)
+            const x: number = MathUtils.randomBetween(zone.start, zone.end || zone.start) * window.app.screen.width
+            const y: number = -dot.sprite.height / 2
 
-            item.update()
-            item.start()
-
-            if (this.currentGroup.impulse) {
-                item.body.applyImpulse([0, this.currentGroup.impulse])
+            if (dotIndex === -1) {
+                this.dots.push(dot)
             }
-            
-            if (--this.amount === 0) {
-                break
-            }
+
+            dot.start(x, y, this.currentGroup.impulse + this.impulse)
+            this.amount -= 1
         }
     }
 
-    private checkOffScreen(): void {
-        this.items.forEach(
-            (value) => {
-                const sprite: Sprite = <Sprite> value.container
+    private nextGroup(): void {
+        this.groupIndex += 1
+        this.amount = this.currentGroup.amount
+        this.leftColor = this.currentGroup.leftColor
+        this.rightColor = this.currentGroup.rightColor
+        this.delayTime = -1
+        this.deltaTime = Date.now()
+    }
 
-                if (sprite.getBounds().y > window.app.screen.bottom && sprite.visible) {
-                    value.stop()
-                    value.container.visible = false
-
-                    this.spawner.put(value)
-                }
-            },
+    private getOffScreenDots(): Dot[] {
+        return this.dots.filter(
+            (value) => value.sprite.y > window.app.screen.bottom && value.sprite.visible,
         )
     }
 }

@@ -1,10 +1,9 @@
 import { PixiState } from "./pixi_state"
 import { Container } from "pixi.js"
 import { Designer } from "../../designer"
-import { LevelColor, LevelController } from "../../level_controller/level_controller"
+import { DotColor, LevelController } from "../../level_controller/level_controller"
 import { MathUtils } from "../../utils/math_utils"
-
-const p2 = require("p2")
+import { LEVELS } from "../../level_controller/levels"
 
 export class PlayState extends PixiState {
     private readonly levelController: LevelController
@@ -17,23 +16,9 @@ export class PlayState extends PixiState {
         super(containers)
 
         this.levelController = new LevelController(
+            LEVELS[0],
             Designer.playScreen,
-            {
-                groups: [
-                    {
-                        amount: 10,
-                        deltaTime: 1000,
-                        colors: [LevelColor.Green],
-                        zones: [{start: window.app.screen.width * 1 / 4}, {start: window.app.screen.width * 3 / 4}]
-                    },
-                    {
-                        amount: 10,
-                        deltaTime: 400,
-                        colors: [LevelColor.Red],
-                        zones: [{start: window.app.screen.width * 1 / 2}]
-                    }
-                ]
-            }
+            [Designer.wallLeft, Designer.wallCenter, Designer.wallCenter, Designer.hood]
         )
         const c: number = Designer.hood.height
         const b: number = window.app.screen.width / 2
@@ -50,7 +35,7 @@ export class PlayState extends PixiState {
     enter(): void {
         super.enter()
 
-        this.levelController.start(() => console.log("+"))
+        this.levelController.start()
     }
 
     update(): string {

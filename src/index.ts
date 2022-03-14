@@ -40,5 +40,3 @@ function start(): void {
 
     window.app.ticker.add(update)
 }
-
-
