@@ -23,6 +23,14 @@ export namespace Designer {
 
     export const hood: Sprite = new Sprite()
 
+    export const statsBg: Sprite = new Sprite()
+
+    export const leftColor: Sprite = new Sprite()
+
+    export const rightColor: Sprite = new Sprite()
+
+    export const balanceText: Text = new Text("0000")
+
     export function init(): void {
         window.app.stage.addChild(titleScreen)
         window.app.stage.addChild(playScreen)
@@ -53,6 +61,7 @@ export namespace Designer {
         playButton.interactive = true
         playButton.buttonMode = true
 
+        playScreen.sortableChildren = true
         playScreen.addChild(buttonLeft)
         playScreen.addChild(buttonRight)
         playScreen.addChild(wallLeft)
@@ -60,6 +69,10 @@ export namespace Designer {
         playScreen.addChild(wallRight)
         playScreen.addChild(shoulder)
         playScreen.addChild(hood)
+        playScreen.addChild(statsBg)
+        playScreen.addChild(leftColor)
+        playScreen.addChild(rightColor)
+        playScreen.addChild(balanceText)
 
         buttonLeft.texture = window.loader.resources["./assets/cube_black.png"].texture
         buttonLeft.anchor.set(0.5)
@@ -110,8 +123,40 @@ export namespace Designer {
         hood.texture = window.loader.resources["./assets/cube_black.png"].texture
         hood.anchor.set(0.5, 1)
         hood.width = window.app.screen.width / 32
-        hood.height = window.app.screen.height * 0.4
+        hood.height = window.app.screen.height * 0.33
         hood.x = window.app.screen.width / 2
         hood.y = window.app.screen.height - wallCenter.height
+
+        statsBg.texture = window.loader.resources["./assets/cube_black.png"].texture
+        statsBg.anchor.set(0.5)
+        statsBg.width = window.app.screen.width
+        statsBg.height = window.app.screen.height / 10
+        statsBg.x = window.app.screen.width / 2
+        statsBg.y = window.app.screen.height - statsBg.height / 2
+        statsBg.zIndex = 1
+
+        leftColor.texture = window.loader.resources["./assets/sphere_white.png"].texture
+        leftColor.anchor.set(0.5)
+        leftColor.x = statsBg.x - statsBg.width * 1 / 4
+        leftColor.y = statsBg.y
+        leftColor.zIndex = 2
+
+        rightColor.texture = window.loader.resources["./assets/sphere_white.png"].texture
+        rightColor.anchor.set(0.5)
+        rightColor.x = statsBg.x + statsBg.width * 1 / 4
+        rightColor.y = statsBg.y
+        rightColor.zIndex = 2
+
+        balanceText.anchor.set(0.5)
+        balanceText.x = statsBg.x
+        balanceText.y = statsBg.y
+        balanceText.style = new TextStyle({
+            align: "center",
+            fontFamily: "IBM 3270",
+            fontSize: 36,
+            fontWeight: "bold",
+            fill: 0xFFFFFF,
+        })
+        balanceText.zIndex = 2
     }
 }
