@@ -8,7 +8,6 @@ const p2 = require("p2")
 
 export interface LevelSettings {
     groups: LevelGroup[]
-    impulseAcc: number
     shuffle?: boolean
     cycle?: boolean
 }
@@ -21,7 +20,6 @@ export enum DotColor {
 
 export interface LevelGroup {
     amount: number
-    delayTime?: number
     deltaTime: number
     colors: DotColor[]
     colorWeights?: number[]
@@ -116,10 +114,7 @@ export class LevelController {
     private groupIndex: number
     private amount: number
     private _balance: number
-    private delayTime: number
     private deltaTime: number
-    private time: number
-    private impulse: number
     private stopped: boolean
     private dots: Dot[]
     private walls: Wall[]
@@ -134,10 +129,7 @@ export class LevelController {
         this.groupIndex = 0
         this.amount = 0
         this._balance = 0
-        this.delayTime = 0
         this.deltaTime = 0
-        this.time = 0
-        this.impulse = 0
         this.stopped = true
         this.dots = []
         this.walls = walls.map((value) => new Wall(value))
@@ -150,7 +142,6 @@ export class LevelController {
 
         if (!cycle) {
             this.balance = 0
-            this.impulse = 0
         }
 
         this.walls.forEach(
@@ -174,8 +165,7 @@ export class LevelController {
     }
 
     update(): void {
-        const oofScreenDots: Dot[] = this.getOffScreenDots()
-        oofScreenDots.forEach(
+        this.getOffScreenDots().forEach(
             (value) => {
                 if (value.sprite.x < window.app.screen.width / 2) {
                     this.balance += value.color === this.leftColor ? 1 : -1
@@ -192,16 +182,9 @@ export class LevelController {
         const now: number = Date.now()
         const passed: boolean = this.passed
 
-        this.impulse += this.settings.impulseAcc * (now - this.time)
-        this.time = now
-
         if (!passed && !this.stopped) {
             if (this.amount === 0) {
-                if (this.delayTime === -1) {
-                    this.delayTime = Date.now()
-                } else if (now - this.delayTime > this.currentGroup.delayTime) {
-                    this.nextGroup()
-                }
+                this.nextGroup()
             }
 
             if (now - this.deltaTime > this.currentGroup.deltaTime) {
@@ -290,7 +273,7 @@ export class LevelController {
                 this.dots.push(dot)
             }
 
-            dot.start(x, y, this.currentGroup.impulse + this.impulse)
+            dot.start(x, y, this.currentGroup.impulse)
             this.amount -= 1
         }
     }
@@ -300,7 +283,6 @@ export class LevelController {
         this.amount = this.currentGroup.amount
         this.leftColor = this.currentGroup.leftColor
         this.rightColor = this.currentGroup.rightColor
-        this.delayTime = -1
         this.deltaTime = Date.now()
     }
 

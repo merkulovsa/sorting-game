@@ -18,7 +18,7 @@ export class PlayState extends PixiState {
         this.levelController = new LevelController(
             LEVELS[0],
             Designer.playScreen,
-            [Designer.wallLeft, Designer.wallCenter, Designer.wallCenter, Designer.hood]
+            [Designer.wallLeft, Designer.wallCenter, Designer.wallRight, Designer.hood]
         )
         const c: number = Designer.hood.height
         const b: number = window.app.screen.width / 2
