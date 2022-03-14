@@ -5,8 +5,6 @@ import { TitleState } from "./state_machine/states/title_state"
 import { StateMachine } from "./state_machine/state_machine"
 import { PhysicsContainer } from "./utils/physics_container"
 
-const p2 = require("p2")
-
 declare global {
     interface Window {
         app: Application
@@ -20,6 +18,7 @@ window.loader = new Loader()
 window.loader.add("./assets/cube_black.png")
 window.loader.add("./assets/sphere_black.png")
 window.loader.add("./assets/sphere_red.png")
+window.loader.add("./assets/sphere_white.png")
 window.loader.onComplete.add(start)
 window.loader.load()
 
@@ -36,7 +35,10 @@ function start(): void {
 
     function update(): void {
         stateMachine.update()
+        PhysicsContainer.update()
     }
 
     window.app.ticker.add(update)
 }
+
+

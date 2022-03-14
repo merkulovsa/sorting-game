@@ -35,10 +35,11 @@ export namespace Designer {
         playText.y = window.app.screen.height / 2
         playText.style = new TextStyle({
             align: "center",
+            fontFamily: "IBM 3270",
             fontSize: 36,
             fontStyle: "italic",
             fontWeight: "bold",
-            fill: ['#ffffff', '#00ff99'],
+            // fill: ['#ffffff', '#00ff99'],
 
         })
 
@@ -58,6 +59,7 @@ export namespace Designer {
         playScreen.addChild(wallCenter)
         playScreen.addChild(wallRight)
         playScreen.addChild(shoulder)
+        playScreen.addChild(hood)
 
         buttonLeft.texture = window.loader.resources["./assets/cube_black.png"].texture
         buttonLeft.anchor.set(0.5)
@@ -79,36 +81,37 @@ export namespace Designer {
 
         wallLeft.texture = window.loader.resources["./assets/cube_black.png"].texture
         wallLeft.anchor.set(0.5)
-        wallLeft.width = 10
+        wallLeft.width = window.app.screen.width / 32
         wallLeft.height = window.app.screen.height
         wallLeft.x = wallLeft.width / 2
         wallLeft.y = window.app.screen.height / 2
 
         wallCenter.texture = window.loader.resources["./assets/cube_black.png"].texture
         wallCenter.anchor.set(0.5)
-        wallCenter.width = 10
+        wallCenter.width = window.app.screen.width / 32
         wallCenter.height = window.app.screen.height / 4
         wallCenter.x = window.app.screen.width / 2
         wallCenter.y = window.app.screen.height - wallCenter.height / 2
 
         wallRight.texture = window.loader.resources["./assets/cube_black.png"].texture
         wallRight.anchor.set(0.5)
-        wallRight.width = 10
+        wallRight.width = window.app.screen.width / 32
         wallRight.height = window.app.screen.height
         wallRight.x = window.app.screen.width - wallRight.width / 2
         wallRight.y = window.app.screen.height / 2
 
         shoulder.texture = window.loader.resources["./assets/sphere_black.png"].texture
         shoulder.anchor.set(0.5)
+        shoulder.width = window.app.screen.width / 10
+        shoulder.height = window.app.screen.width / 10
         shoulder.x = window.app.screen.width / 2
         shoulder.y = window.app.screen.height * 3 / 4
-        shoulder.addChild(hood)
 
         hood.texture = window.loader.resources["./assets/cube_black.png"].texture
-        hood.anchor.set(0.5)
-        hood.width = 10
+        hood.anchor.set(0.5, 1)
+        hood.width = window.app.screen.width / 32
         hood.height = window.app.screen.height * 0.4
-        hood.x = 0
-        hood.y = -hood.height / 2
+        hood.x = window.app.screen.width / 2
+        hood.y = window.app.screen.height - wallCenter.height
     }
 }

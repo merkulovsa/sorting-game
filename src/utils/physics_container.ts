@@ -4,7 +4,7 @@ const p2 = require("p2")
 
 export class PhysicsContainer {
     static get world(): p2.World {
-        return (this._world || (this._world = new p2.World({gravity: [0, 100]})))
+        return (this._world || (this._world = new p2.World({gravity: [0, window.app.screen.height / 2]})))
     }
 
     static update(): void {
@@ -27,18 +27,15 @@ export class PhysicsContainer {
         this.container = container
         this.body = body
 
-        PhysicsContainer.world.addBody(body)
         PhysicsContainer.instances.push(this)
     }
 
     start(): void {
-        this.body.type = p2.Body.DYNAMIC
+        PhysicsContainer.world.addBody(this.body)
     }
 
     stop(): void {
-        this.body.velocity = [0, 0]
-        this.body.angularVelocity = 0
-        this.body.type = p2.Body.STATIC
+        PhysicsContainer.world.removeBody(this.body)
     }
 
     update(): void {
