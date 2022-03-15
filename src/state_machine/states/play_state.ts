@@ -40,7 +40,7 @@ export class PlayState extends PixiState {
     update(): string {
         this.levelController.update()
 
-        Designer.hood.rotation = MathUtils.lerp(Designer.hood.rotation, this.targetRotation, 0.2)
+        Designer.hood.rotation = MathUtils.lerp(Designer.hood.rotation, this.targetRotation, 0.8)
 
         return super.update()
     }
