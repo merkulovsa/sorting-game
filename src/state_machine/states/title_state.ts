@@ -7,7 +7,7 @@ export class TitleState extends PixiState {
     constructor(containers: Container[]) {
         super(containers)
 
-        Designer.playButton.on("click", () => this.onClick())
+        Designer.playButton.on("pointerdown", () => this.onClick())
     }
 
     private onClick(): void {
