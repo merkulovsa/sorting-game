@@ -19,8 +19,6 @@ export namespace Designer {
 
     export const wallCenter: Sprite = new Sprite()
 
-    export const shoulder: Sprite = new Sprite()
-
     export const hood: Sprite = new Sprite()
 
     export const statsBg: Sprite = new Sprite()
@@ -69,7 +67,6 @@ export namespace Designer {
         playScreen.addChild(wallLeft)
         playScreen.addChild(wallCenter)
         playScreen.addChild(wallRight)
-        playScreen.addChild(shoulder)
         playScreen.addChild(hood)
         playScreen.addChild(statsBg)
         playScreen.addChild(leftColor)
@@ -104,7 +101,7 @@ export namespace Designer {
         wallCenter.texture = window.loader.resources["./assets/cube_black.png"].texture
         wallCenter.anchor.set(0.5)
         wallCenter.width = window.app.screen.width / 32
-        wallCenter.height = window.app.screen.height / 4
+        wallCenter.height = window.app.screen.height / 10
         wallCenter.x = window.app.screen.width / 2
         wallCenter.y = window.app.screen.height - wallCenter.height / 2
 
@@ -114,13 +111,6 @@ export namespace Designer {
         wallRight.height = window.app.screen.height
         wallRight.x = window.app.screen.width - wallRight.width / 2
         wallRight.y = window.app.screen.height / 2
-
-        shoulder.texture = window.loader.resources["./assets/sphere_black.png"].texture
-        shoulder.anchor.set(0.5)
-        shoulder.width = window.app.screen.width / 10
-        shoulder.height = window.app.screen.width / 10
-        shoulder.x = window.app.screen.width / 2
-        shoulder.y = window.app.screen.height * 3 / 4
 
         hood.texture = window.loader.resources["./assets/cube_black.png"].texture
         hood.anchor.set(0.5, 1)

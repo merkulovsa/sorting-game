@@ -1,12 +1,12 @@
 import { PixiState } from "./pixi_state"
 import { Container } from "pixi.js"
 import { Designer } from "../../designer"
-import { DotColor, LevelController } from "../../level_controller/level_controller"
+import { LevelController } from "../../level_controller/level_controller"
 import { MathUtils } from "../../utils/math_utils"
 import { LEVELS } from "../../level_controller/levels"
 
 export class PlayState extends PixiState {
-    private static readonly hoodRotation: number = Math.PI / 6
+    private static readonly hoodRotation: number = Math.PI / 4
 
     private readonly levelController: LevelController
 
@@ -18,7 +18,7 @@ export class PlayState extends PixiState {
         Designer.hood.height = window.app.screen.width / 2 / Math.cos(Math.PI / 2 - PlayState.hoodRotation)
 
         this.levelController = new LevelController(
-            LEVELS[0],
+            LEVELS[1],
             Designer.playScreen,
             [Designer.wallLeft, Designer.wallCenter, Designer.wallRight, Designer.hood]
         )
@@ -39,7 +39,7 @@ export class PlayState extends PixiState {
     update(): string {
         this.levelController.update()
 
-        Designer.hood.rotation = MathUtils.lerp(Designer.hood.rotation, this.targetRotation, 0.5)
+        Designer.hood.rotation = MathUtils.lerp(Designer.hood.rotation, this.targetRotation, 0.2)
 
         return super.update()
     }

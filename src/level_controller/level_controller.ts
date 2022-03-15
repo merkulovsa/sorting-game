@@ -19,13 +19,13 @@ export enum DotColor {
 }
 
 export interface LevelGroup {
-    amount: number
-    deltaTime: number
-    colors: DotColor[]
+    amount?: number
+    deltaTime?: number
+    colors?: DotColor[]
     colorWeights?: number[]
-    leftColor: DotColor
-    rightColor: DotColor
-    zones: Array<{ start: number, end?: number }>
+    leftColor?: DotColor
+    rightColor?: DotColor
+    zones?: Array<{ start: number, end?: number }>
     impulse?: number
 }
 
@@ -44,6 +44,12 @@ abstract class LevelObject {
 }
 
 class Dot extends LevelObject {
+    static readonly colors: DotColor[] = [
+        DotColor.Red,
+        DotColor.Green,
+        DotColor.Blue,
+    ]
+
     constructor(physicsContainer: PhysicsContainer) {
         super(physicsContainer)
 
@@ -112,6 +118,7 @@ export class LevelController {
 
     private groups: LevelGroup[]
     private groupIndex: number
+    private currentGroup: LevelGroup
     private amount: number
     private _balance: number
     private deltaTime: number
@@ -148,7 +155,6 @@ export class LevelController {
             (value) => value.start()
         )
 
-        this.groupIndex = -1
         this.stopped = false
         this.onPassed = onPassed
         this.onFailed = onFailed
@@ -183,11 +189,11 @@ export class LevelController {
         const passed: boolean = this.passed
 
         if (!passed && !this.stopped) {
-            if (this.amount === 0) {
-                this.nextGroup()
-            }
-
             if (now - this.deltaTime > this.currentGroup.deltaTime) {
+                if (this.amount === 0) {
+                    this.nextGroup()
+                }
+
                 this.startDot()
                 this.deltaTime = now
             }
@@ -205,11 +211,7 @@ export class LevelController {
     }
 
     private get passed(): boolean {
-        return this.groupIndex === this.settings.groups.length - 1 && this.amount === 0
-    }
-
-    private get currentGroup(): LevelGroup {
-        return this.groups[this.groupIndex]
+        return this.groupIndex === this.settings.groups.length && this.amount === 0
     }
 
     private get leftColor(): DotColor {
@@ -259,10 +261,14 @@ export class LevelController {
         for (const zone of this.currentGroup.zones.slice(0, this.amount)) {
             const dot: Dot = this.spawner.get()
 
-            if (this.currentGroup.colorWeights) {
-                dot.color = MathUtils.randomWeightedValue(this.currentGroup.colors, this.currentGroup.colorWeights)
+            if (this.currentGroup.colors.length) {
+                if (this.currentGroup.colorWeights.length === this.currentGroup.colors.length) {
+                    dot.color = MathUtils.randomWeightedValue(this.currentGroup.colors, this.currentGroup.colorWeights)
+                } else {
+                    dot.color = MathUtils.randomValue(this.currentGroup.colors)
+                }
             } else {
-                dot.color = MathUtils.randomValue(this.currentGroup.colors)
+                dot.color = MathUtils.randomValue(Dot.colors)
             }
 
             const dotIndex: number = this.dots.indexOf(dot)
@@ -279,7 +285,16 @@ export class LevelController {
     }
 
     private nextGroup(): void {
-        this.groupIndex += 1
+        this.currentGroup = this.settings.groups[this.groupIndex++]
+        this.currentGroup.amount = this.currentGroup.amount || 0
+        this.currentGroup.colors = this.currentGroup.colors || []
+        this.currentGroup.leftColor = this.currentGroup.leftColor || this.leftColor
+        this.currentGroup.rightColor = this.currentGroup.rightColor || this.rightColor
+        this.currentGroup.zones = this.currentGroup.zones || [{start: window.app.screen.left, end: window.app.screen.right}]
+        this.currentGroup.colorWeights = this.currentGroup.colorWeights || []
+        this.currentGroup.deltaTime = this.currentGroup.deltaTime || 0
+        this.currentGroup.impulse = this.currentGroup.impulse || 0
+
         this.amount = this.currentGroup.amount
         this.leftColor = this.currentGroup.leftColor
         this.rightColor = this.currentGroup.rightColor

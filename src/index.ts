@@ -17,8 +17,6 @@ console.log(window.screen.availHeight)
 
 window.loader = new Loader()
 window.loader.add("./assets/cube_black.png")
-window.loader.add("./assets/sphere_black.png")
-window.loader.add("./assets/sphere_red.png")
 window.loader.add("./assets/sphere_white.png")
 window.loader.onComplete.add(start)
 window.loader.load()

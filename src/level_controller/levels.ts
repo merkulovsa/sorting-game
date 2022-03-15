@@ -1,6 +1,7 @@
 import { DotColor, LevelSettings } from "./level_controller";
 
 export const LEVELS: LevelSettings[] = [
+    // LEVEL 0
     {
         groups: [
             {
@@ -104,6 +105,127 @@ export const LEVELS: LevelSettings[] = [
                 deltaTime: 150,
                 impulse: 200,
             },
+        ]
+    },
+
+    // LEVEL 1
+    {
+        groups: [
+            {
+                amount: 20,
+                leftColor: DotColor.Red,
+                rightColor: DotColor.Green,
+                colors: [DotColor.Red],
+                zones: [
+                    {start: 1/2},
+                ],
+                deltaTime: 100,
+                impulse: 1000,
+            },
+            {
+                deltaTime: 500
+            },
+            {
+                amount: 20,
+                leftColor: DotColor.Red,
+                rightColor: DotColor.Green,
+                colors: [DotColor.Green],
+                zones: [
+                    {start: 1/2},
+                    {start: 3/4},
+                ],
+                deltaTime: 100,
+                impulse: 1000,
+            },
+            {
+                deltaTime: 500
+            },
+            {
+                amount: 40,
+                leftColor: DotColor.Blue,
+                rightColor: DotColor.Green,
+                colors: [DotColor.Blue],
+                zones: [
+                    {start: 4/7},
+                    {start: 5/7},
+                    {start: 6/7},
+                ],
+                deltaTime: 100,
+                impulse: 1000,
+            },
+            {
+                amount: 40,
+                leftColor: DotColor.Blue,
+                rightColor: DotColor.Green,
+                colors: [DotColor.Green],
+                zones: [
+                    {start: 4/7},
+                    {start: 5/7},
+                    {start: 6/7},
+                ],
+                deltaTime: 100,
+                impulse: 1000,
+            },
+            {
+                amount: 80,
+                leftColor: DotColor.Blue,
+                rightColor: DotColor.Green,
+                colors: [DotColor.Blue],
+                zones: [
+                    {start: 1/7},
+                    {start: 2/7},
+                    {start: 3/7},
+                    {start: 4/7},
+                    {start: 5/7},
+                    {start: 6/7},
+                ],
+                deltaTime: 100,
+                impulse: 1000,
+            },
+            {
+                amount: 20,
+                leftColor: DotColor.Blue,
+                rightColor: DotColor.Red,
+                colors: [DotColor.Red],
+                zones: [
+                    {start: 2/3},
+                ],
+                deltaTime: 50,
+                impulse: 2000,
+            },
+            {
+                amount: 20,
+                leftColor: DotColor.Blue,
+                rightColor: DotColor.Red,
+                colors: [DotColor.Blue],
+                zones: [
+                    {start: 1/3},
+                ],
+                deltaTime: 50,
+                impulse: 2000,
+            },
+            {
+                amount: 40,
+                leftColor: DotColor.Blue,
+                rightColor: DotColor.Green,
+                colors: [DotColor.Green],
+                zones: [
+                    {start: 1/3},
+                ],
+                deltaTime: 50,
+                impulse: 2000,
+            },
+            {
+                amount: 20,
+                leftColor: DotColor.Blue,
+                rightColor: DotColor.Green,
+                colors: [DotColor.Green],
+                zones: [
+                    {start: 2/3},
+                ],
+                deltaTime: 50,
+                impulse: 2000,
+            }
         ]
     }
 ]
