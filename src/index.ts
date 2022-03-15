@@ -12,7 +12,7 @@ declare global {
     }
 }
 
-window.app = new Application({ width: window.screen.availWidth, height: window.screen.availWidth, backgroundColor: 0x1099bb })
+window.app = new Application({ resizeTo: window, backgroundColor: 0x1099bb })
 console.log(window.screen.availHeight)
 
 window.loader = new Loader()
