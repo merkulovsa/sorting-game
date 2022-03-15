@@ -4,6 +4,7 @@ import { Designer } from "../../designer"
 import { LevelController } from "../../level_controller/level_controller"
 import { MathUtils } from "../../utils/math_utils"
 import { LEVELS } from "../../level_controller/levels"
+import { EndState } from "./end_state"
 
 export class PlayState extends PixiState {
     private static readonly hoodRotation: number = Math.PI / 4
@@ -33,7 +34,7 @@ export class PlayState extends PixiState {
     enter(): void {
         super.enter()
 
-        this.levelController.start()
+        this.levelController.start(null, (time) => this.onFailed(time))
     }
 
     update(): string {
@@ -42,6 +43,12 @@ export class PlayState extends PixiState {
         Designer.hood.rotation = MathUtils.lerp(Designer.hood.rotation, this.targetRotation, 0.2)
 
         return super.update()
+    }
+
+    private onFailed(time: number): void {
+        Designer.timeText.text = (time / 1e3).toFixed() + "s"
+
+        this.nextStateName = EndState.name
     }
 
     private onButtonRelease(): void {

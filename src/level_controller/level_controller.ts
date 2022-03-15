@@ -8,8 +8,13 @@ const p2 = require("p2")
 
 export interface LevelSettings {
     groups: LevelGroup[]
+    interGroup?: LevelGroup
     shuffle?: boolean
     cycle?: boolean
+    timeImpulse?: number
+    baseImpulse?: number
+    penalty?: number
+    reward?: number
 }
 
 export enum DotColor {
@@ -112,6 +117,33 @@ class Wall extends LevelObject {
 }
 
 export class LevelController {
+    static copyLevelSettings(value: LevelSettings): LevelSettings {
+        return {
+            groups: value.groups.map((value1) => LevelController.copyLevelGroup(value1)),
+            interGroup: value.interGroup,
+            shuffle: value.shuffle,
+            cycle: value.cycle,
+            timeImpulse: value.timeImpulse,
+            baseImpulse: value.baseImpulse,
+            penalty: value.penalty,
+            reward: value.reward,
+        }
+    }
+
+    static copyLevelGroup(value: LevelGroup): LevelGroup {
+        return {
+            amount: value.amount,
+            deltaTime: value.deltaTime,
+            colors: value.colors,
+            colorWeights: value.colorWeights,
+            leftColor: value.leftColor,
+            rightColor: value.rightColor,
+            zones: value.zones,
+            impulse: value.impulse,
+        }
+    }
+
+
     private readonly container: Container
     private readonly settings: LevelSettings
     private readonly spawner: Pool<Dot>
@@ -121,40 +153,55 @@ export class LevelController {
     private currentGroup: LevelGroup
     private amount: number
     private _balance: number
+    private startTime: number
+    private stopTime: number
     private deltaTime: number
     private stopped: boolean
     private dots: Dot[]
     private walls: Wall[]
     private onPassed: () => void
-    private onFailed: () => void
+    private onFailed: (time: number) => void
 
     constructor(settings: LevelSettings, container: Container, walls: Sprite[]) {
         this.container = container
-        this.settings = settings
+        this.settings = LevelController.copyLevelSettings(settings)
+        this.settings.cycle = settings.cycle || false
+        this.settings.shuffle = settings.shuffle || false
+        this.settings.penalty = settings.penalty || 1
+        this.settings.reward = settings.reward || 1
+        this.settings.baseImpulse = settings.baseImpulse || 0
+        this.settings.timeImpulse = settings.timeImpulse || 0
         this.spawner = new Pool(() => this.createDot())
         this.groups = this.settings.groups.slice()
         this.groupIndex = 0
+        this.currentGroup = null
         this.amount = 0
         this._balance = 0
+        this.startTime = 0
+        this.stopTime = 0
         this.deltaTime = 0
         this.stopped = true
         this.dots = []
         this.walls = walls.map((value) => new Wall(value))
     }
 
-    start(onPassed?: () => void, onFailed?: () => void, cycle?: boolean): void {
+    start(onPassed?: () => void, onFailed?: (time: number) => void, cycle?: boolean): void {
         if (this.settings.shuffle) {
             this.groups = MathUtils.shuffle(this.groups)
         }
 
         if (!cycle) {
+            this.currentGroup = null
             this.balance = 0
+            this.startTime = Date.now()
+            this.stopTime = 0
         }
 
         this.walls.forEach(
             (value) => value.start()
         )
 
+        this.groupIndex = 0
         this.stopped = false
         this.onPassed = onPassed
         this.onFailed = onFailed
@@ -174,9 +221,9 @@ export class LevelController {
         this.getOffScreenDots().forEach(
             (value) => {
                 if (value.sprite.x < window.app.screen.width / 2) {
-                    this.balance += value.color === this.leftColor ? 1 : -1
+                    this.balance += value.color === this.leftColor ? this.settings.reward : -this.settings.penalty
                 } else {
-                    this.balance += value.color === this.rightColor ? 1 : -1
+                    this.balance += value.color === this.rightColor ? this.settings.reward : -this.settings.penalty
                 }
 
                 value.stop()
@@ -188,13 +235,22 @@ export class LevelController {
         const now: number = Date.now()
         const passed: boolean = this.passed
 
-        if (!passed && !this.stopped) {
+        if (this.balance < 0 && !this.stopped) {
+            if (!this.stopTime) {
+                this.stopTime = now
+            }
+
+            if (this.spawner.used.length === 0) {
+                this.stop()
+                this.onFailed && this.onFailed(this.stopTime - this.startTime)
+            }
+        } else if (!passed && !this.stopped) {
             if (now - this.deltaTime > this.currentGroup.deltaTime) {
                 if (this.amount === 0) {
                     this.nextGroup()
                 }
 
-                this.startDot()
+                this.startDot(now)
                 this.deltaTime = now
             }
         } else if (passed && !this.stopped) {
@@ -204,14 +260,11 @@ export class LevelController {
                 this.stopped = true
                 this.onPassed && this.onPassed()
             }
-        } else if (!passed && this.stopped) {
-            this.stopped = true
-            this.onFailed && this.onFailed()
         }
     }
 
     private get passed(): boolean {
-        return this.groupIndex === this.settings.groups.length && this.amount === 0
+        return this.groupIndex === this.settings.groups.length
     }
 
     private get leftColor(): DotColor {
@@ -257,7 +310,7 @@ export class LevelController {
         return new Dot(new PhysicsContainer(sprite, body))
     }
 
-    private startDot(): void {
+    private startDot(time: number): void {
         for (const zone of this.currentGroup.zones.slice(0, this.amount)) {
             const dot: Dot = this.spawner.get()
 
@@ -279,26 +332,43 @@ export class LevelController {
                 this.dots.push(dot)
             }
 
-            dot.start(x, y, this.currentGroup.impulse)
+            let impulse: number = this.settings.baseImpulse
+
+            if (this.settings.timeImpulse) {
+                impulse += this.settings.timeImpulse * (time - this.startTime)
+            } else {
+                impulse += this.currentGroup.impulse
+            }
+
+            dot.start(x, y, impulse)
+
             this.amount -= 1
         }
     }
 
     private nextGroup(): void {
-        this.currentGroup = this.settings.groups[this.groupIndex++]
+        if ((this.settings.interGroup && this.currentGroup) && this.currentGroup !== this.settings.interGroup) {
+            this.currentGroup = this.settings.interGroup
+        } else {
+            this.currentGroup = this.settings.groups[this.groupIndex++]
+        }
+        
         this.currentGroup.amount = this.currentGroup.amount || 0
         this.currentGroup.colors = this.currentGroup.colors || []
-        this.currentGroup.leftColor = this.currentGroup.leftColor || this.leftColor
-        this.currentGroup.rightColor = this.currentGroup.rightColor || this.rightColor
         this.currentGroup.zones = this.currentGroup.zones || [{start: window.app.screen.left, end: window.app.screen.right}]
         this.currentGroup.colorWeights = this.currentGroup.colorWeights || []
         this.currentGroup.deltaTime = this.currentGroup.deltaTime || 0
         this.currentGroup.impulse = this.currentGroup.impulse || 0
 
         this.amount = this.currentGroup.amount
-        this.leftColor = this.currentGroup.leftColor
-        this.rightColor = this.currentGroup.rightColor
         this.deltaTime = Date.now()
+
+        if (this.currentGroup.leftColor) {
+            this.leftColor = this.currentGroup.leftColor
+        }
+        if (this.currentGroup.rightColor) {
+            this.rightColor = this.currentGroup.rightColor
+        }
     }
 
     private getOffScreenDots(): Dot[] {

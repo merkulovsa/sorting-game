@@ -1,43 +1,58 @@
 export class Pool<T> {
     private readonly create: () => T
 
-    private used: T[]
-    private unused: T[]
+    private _used: T[]
+    private _unused: T[]
 
     constructor(create: () => T) {
         this.create = create
-        this.used = []
-        this.unused = []
+        this._used = []
+        this._unused = []
+    }
+
+    get all(): T[] {
+        return [...this._used, ...this._unused]
+    }
+
+    get used(): T[] {
+        return this._used
+    }
+
+    get unused(): T[] {
+        return this._unused
     }
 
     get(): T {
-        if (this.unused.length) {
-            return this.unused.pop()
+        let value: T
+
+        if (this._unused.length > 0) {
+            value = this._unused.pop()
+        } else {
+            value = this.create()
         }
 
-        const value: T = this.create()
-        this.used.push(value)
+        this._used.push(value)
 
         return value
     }
 
     put(value: T) {
-        const index: number = this.used.indexOf(value)
+        const index: number = this._used.indexOf(value)
         if (index !== -1) {
-            this.used.splice(index)
+            this._used.splice(index, 1)
         }
 
-        this.unused.push(value)
+        this._unused.push(value)
     }
 
     reset(): void {
-        while (this.used.length) {
-            this.unused.push(this.used.pop())
+        while (this._used.length) {
+            this._unused.push(this._used.pop())
         }
     }
 
     clear(): void {
-        this.used = []
-        this.unused = []
+        this._used = []
+        this._unused = []
     }
 }

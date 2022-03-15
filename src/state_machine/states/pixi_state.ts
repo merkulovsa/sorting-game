@@ -20,6 +20,8 @@ export abstract class PixiState extends State {
     }
 
     exit(): void {
+        this.nextStateName = ""
+        
         this.containers.forEach(
             (value) => value.visible = false,
         )

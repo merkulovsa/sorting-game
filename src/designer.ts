@@ -1,11 +1,15 @@
-import { Container, Sprite, Text, TextStyle } from "pixi.js"
+import { Container, Sprite, Text, TextStyle, Texture } from "pixi.js"
 
 export namespace Designer {
+    // TITLE SCREEN
+
     export const titleScreen: Container = new Container()
 
     export const playButton: Sprite = new Sprite()
 
     export const playText: Text = new Text("PRESS\nANYWHERE\nTO PLAY")
+
+    // PLAY SCREEN
 
     export const playScreen: Container = new Container()
 
@@ -27,13 +31,26 @@ export namespace Designer {
 
     export const rightColor: Sprite = new Sprite()
 
-    export const balanceText: Text = new Text("0000")
+    export const balanceText: Text = new Text("")
+
+    // END SCREEN
+
+    export const endScreen: Container = new Container()
+
+    export const endText: Text = new Text("GAME ENDED!\nYOUR TIME IS:")
+
+    export const timeText: Text = new Text("")
+
+    export const skipButton: Sprite = new Sprite()
+
+    export const hintText: Text = new Text("(PRESS\nANYWHERE\nTO SKIP)")
 
     export function init(): void {
         const scaleFactor: number = window.app.screen.width / 320
 
         window.app.stage.addChild(titleScreen)
         window.app.stage.addChild(playScreen)
+        window.app.stage.addChild(endScreen)
 
         titleScreen.addChild(playText)
         titleScreen.addChild(playButton)
@@ -51,7 +68,7 @@ export namespace Designer {
             fontWeight: "bold",
         })
 
-        playButton.texture = window.loader.resources["./assets/cube_black.png"].texture
+        playButton.texture = Texture.WHITE
         playButton.anchor.set(0.5)
         playButton.width = window.app.screen.width
         playButton.height = window.app.screen.height
@@ -73,7 +90,7 @@ export namespace Designer {
         playScreen.addChild(rightColor)
         playScreen.addChild(balanceText)
 
-        buttonLeft.texture = window.loader.resources["./assets/cube_black.png"].texture
+        buttonLeft.texture = Texture.WHITE
         buttonLeft.anchor.set(0.5)
         buttonLeft.width = window.app.screen.width / 2
         buttonLeft.height = window.app.screen.height
@@ -82,7 +99,7 @@ export namespace Designer {
         buttonLeft.alpha = 0
         buttonLeft.interactive = true
 
-        buttonRight.texture = window.loader.resources["./assets/cube_black.png"].texture
+        buttonRight.texture = Texture.WHITE
         buttonRight.anchor.set(0.5)
         buttonRight.width = window.app.screen.width / 2
         buttonRight.height = window.app.screen.height
@@ -91,34 +108,39 @@ export namespace Designer {
         buttonRight.alpha = 0
         buttonRight.interactive = true
 
-        wallLeft.texture = window.loader.resources["./assets/cube_black.png"].texture
+        wallLeft.texture = Texture.WHITE
+        wallLeft.tint = 0x000000
         wallLeft.anchor.set(0.5)
         wallLeft.width = window.app.screen.width / 32
         wallLeft.height = window.app.screen.height
         wallLeft.x = wallLeft.width / 2
         wallLeft.y = window.app.screen.height / 2
 
-        wallCenter.texture = window.loader.resources["./assets/cube_black.png"].texture
+        wallCenter.texture = Texture.WHITE
+        wallCenter.tint = 0x000000
         wallCenter.anchor.set(0.5)
         wallCenter.width = window.app.screen.width / 32
         wallCenter.height = window.app.screen.height / 10
         wallCenter.x = window.app.screen.width / 2
         wallCenter.y = window.app.screen.height - wallCenter.height / 2
 
-        wallRight.texture = window.loader.resources["./assets/cube_black.png"].texture
+        wallRight.texture = Texture.WHITE
+        wallRight.tint = 0x000000
         wallRight.anchor.set(0.5)
         wallRight.width = window.app.screen.width / 32
         wallRight.height = window.app.screen.height
         wallRight.x = window.app.screen.width - wallRight.width / 2
         wallRight.y = window.app.screen.height / 2
 
-        hood.texture = window.loader.resources["./assets/cube_black.png"].texture
+        hood.texture = Texture.WHITE
+        hood.tint = 0x000000
         hood.anchor.set(0.5, 1)
         hood.width = window.app.screen.width / 32
         hood.x = window.app.screen.width / 2
         hood.y = window.app.screen.height - wallCenter.height
 
-        statsBg.texture = window.loader.resources["./assets/cube_black.png"].texture
+        statsBg.texture = Texture.WHITE
+        statsBg.tint = 0x000000
         statsBg.anchor.set(0.5)
         statsBg.width = window.app.screen.width
         statsBg.height = window.app.screen.height / 10
@@ -155,5 +177,58 @@ export namespace Designer {
             fill: 0xFFFFFF,
         })
         balanceText.zIndex = 2
+
+        endScreen.addChild(endText)
+        endScreen.addChild(timeText)
+        endScreen.addChild(skipButton)
+        endScreen.addChild(hintText)
+
+        endText.anchor.set(0.5)
+        endText.x = window.app.screen.width * 1 / 2
+        endText.y = window.app.screen.height * 1 / 3
+        endText.scale.x = scaleFactor
+        endText.scale.y  =scaleFactor
+        endText.style = new TextStyle({
+            align: "center",
+            fontFamily: "IBM 3270",
+            fontSize: 32,
+            fontStyle: "italic",
+            fontWeight: "bold",
+        })
+
+        timeText.anchor.set(0.5)
+        timeText.x = window.app.screen.width * 1 / 2
+        timeText.y = window.app.screen.height * 1 / 2
+        timeText.scale.x = scaleFactor
+        timeText.scale.y  =scaleFactor
+        timeText.style = new TextStyle({
+            align: "center",
+            fontFamily: "IBM 3270",
+            fontSize: 40,
+            fontWeight: "bold",
+        })
+
+        hintText.anchor.set(0.5)
+        hintText.x = window.app.screen.width * 1 / 2
+        hintText.y = window.app.screen.height * 2 / 3
+        hintText.scale.x = scaleFactor
+        hintText.scale.y  =scaleFactor
+        hintText.style = new TextStyle({
+            align: "center",
+            fontFamily: "IBM 3270",
+            fontSize: 32,
+            fontStyle: "italic",
+            fontWeight: "bold",
+        })
+
+        skipButton.texture = Texture.WHITE
+        skipButton.anchor.set(0.5)
+        skipButton.width = window.app.screen.width
+        skipButton.height = window.app.screen.height
+        skipButton.x = window.app.screen.width * 1 / 2
+        skipButton.y = window.app.screen.height * 1 / 2
+        skipButton.alpha = 0
+        skipButton.buttonMode = true
+        skipButton.interactive = true
     }
 }

@@ -1,5 +1,6 @@
 import { Application, Loader } from "pixi.js"
 import { Designer } from "./designer"
+import { EndState } from "./state_machine/states/end_state"
 import { PlayState } from "./state_machine/states/play_state"
 import { TitleState } from "./state_machine/states/title_state"
 import { StateMachine } from "./state_machine/state_machine"
@@ -16,7 +17,6 @@ window.app = new Application({ width: window.innerWidth, height: window.innerHei
 console.log(window.screen.availHeight)
 
 window.loader = new Loader()
-window.loader.add("./assets/cube_black.png")
 window.loader.add("./assets/sphere_white.png")
 window.loader.onComplete.add(start)
 window.loader.load()
@@ -28,7 +28,8 @@ function start(): void {
 
     const stateMachine: StateMachine = new StateMachine(
         new TitleState([Designer.titleScreen]),
-        new PlayState([Designer.playScreen])
+        new PlayState([Designer.playScreen]),
+        new EndState([Designer.endScreen]),
     )
     stateMachine.change(TitleState.name)
 
