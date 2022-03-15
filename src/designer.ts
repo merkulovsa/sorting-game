@@ -32,6 +32,8 @@ export namespace Designer {
     export const balanceText: Text = new Text("0000")
 
     export function init(): void {
+        const scaleFactor: number = window.app.screen.width / 320
+
         window.app.stage.addChild(titleScreen)
         window.app.stage.addChild(playScreen)
 
@@ -41,14 +43,14 @@ export namespace Designer {
         playText.anchor.set(0.5)
         playText.x = window.app.screen.width / 2
         playText.y = window.app.screen.height / 2
+        playText.scale.x = scaleFactor
+        playText.scale.y = scaleFactor
         playText.style = new TextStyle({
             align: "center",
             fontFamily: "IBM 3270",
             fontSize: 36,
             fontStyle: "italic",
             fontWeight: "bold",
-            // fill: ['#ffffff', '#00ff99'],
-
         })
 
         playButton.texture = window.loader.resources["./assets/cube_black.png"].texture
@@ -123,7 +125,6 @@ export namespace Designer {
         hood.texture = window.loader.resources["./assets/cube_black.png"].texture
         hood.anchor.set(0.5, 1)
         hood.width = window.app.screen.width / 32
-        hood.height = window.app.screen.height * 0.33
         hood.x = window.app.screen.width / 2
         hood.y = window.app.screen.height - wallCenter.height
 
@@ -137,12 +138,16 @@ export namespace Designer {
 
         leftColor.texture = window.loader.resources["./assets/sphere_white.png"].texture
         leftColor.anchor.set(0.5)
+        leftColor.width = statsBg.height / 2
+        leftColor.height = statsBg.height / 2
         leftColor.x = statsBg.x - statsBg.width * 1 / 4
         leftColor.y = statsBg.y
         leftColor.zIndex = 2
 
         rightColor.texture = window.loader.resources["./assets/sphere_white.png"].texture
         rightColor.anchor.set(0.5)
+        rightColor.width = statsBg.height / 2
+        rightColor.height = statsBg.height / 2
         rightColor.x = statsBg.x + statsBg.width * 1 / 4
         rightColor.y = statsBg.y
         rightColor.zIndex = 2
@@ -150,6 +155,8 @@ export namespace Designer {
         balanceText.anchor.set(0.5)
         balanceText.x = statsBg.x
         balanceText.y = statsBg.y
+        balanceText.scale.x = scaleFactor
+        balanceText.scale.y = scaleFactor
         balanceText.style = new TextStyle({
             align: "center",
             fontFamily: "IBM 3270",

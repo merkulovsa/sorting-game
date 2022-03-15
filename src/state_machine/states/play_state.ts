@@ -6,24 +6,22 @@ import { MathUtils } from "../../utils/math_utils"
 import { LEVELS } from "../../level_controller/levels"
 
 export class PlayState extends PixiState {
+    private static readonly hoodRotation: number = Math.PI / 6
+
     private readonly levelController: LevelController
-    private readonly leftRotation: number
-    private readonly rightRotation: number
 
     private targetRotation: number
 
     constructor(containers: Container[]) {
         super(containers)
 
+        Designer.hood.height = window.app.screen.width / 2 / Math.cos(Math.PI / 2 - PlayState.hoodRotation)
+
         this.levelController = new LevelController(
             LEVELS[0],
             Designer.playScreen,
             [Designer.wallLeft, Designer.wallCenter, Designer.wallRight, Designer.hood]
         )
-        const c: number = Designer.hood.height
-        const b: number = window.app.screen.width / 2
-        this.leftRotation = -Math.acos(b / c)
-        this.rightRotation = -this.leftRotation
         this.targetRotation = 0
 
         Designer.buttonLeft.on("pointerdown", () => this.onLeftButtonDown())
@@ -51,10 +49,10 @@ export class PlayState extends PixiState {
     }
 
     private onLeftButtonDown(): void {
-        this.targetRotation = this.leftRotation
+        this.targetRotation = -PlayState.hoodRotation
     }
 
     private onRightButtonDown(): void {
-        this.targetRotation = this.rightRotation
+        this.targetRotation = PlayState.hoodRotation
     }
 }
