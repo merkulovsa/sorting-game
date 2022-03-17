@@ -14,7 +14,6 @@ declare global {
 }
 
 window.app = new Application({ width: window.innerWidth, height: window.innerHeight, backgroundColor: 0x1099bb })
-console.log(window.screen.availHeight)
 
 window.loader = new Loader()
 window.loader.add("./assets/sphere_white.png")

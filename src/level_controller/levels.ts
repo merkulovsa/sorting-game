@@ -112,7 +112,7 @@ export const LEVELS: LevelSettings[] = [
     {
         cycle: true,
         shuffle: true,
-        penalty: 3,
+        penalty: 5,
         reward: 1,
         interGroup: {deltaTime: 100},
         baseImpulse: 1e3,

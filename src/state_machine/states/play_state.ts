@@ -21,8 +21,11 @@ export class PlayState extends PixiState {
         this.levelController = new LevelController(
             LEVELS[1],
             Designer.playScreen,
-            [Designer.wallLeft, Designer.wallCenter, Designer.wallRight, Designer.hood]
+            [Designer.wallLeft, Designer.wallCenter, Designer.wallRight, Designer.hood],
+            Designer.leftTrigger,
+            Designer.rightTrigger,
         )
+        this.levelController.on("failed", (_, time) => this.onFailed(time))
         this.targetRotation = 0
 
         Designer.buttonLeft.on("pointerdown", () => this.onLeftButtonDown())
@@ -34,7 +37,7 @@ export class PlayState extends PixiState {
     enter(): void {
         super.enter()
 
-        this.levelController.start(null, (time) => this.onFailed(time))
+        this.levelController.start()
     }
 
     update(): string {

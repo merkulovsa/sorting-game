@@ -7,7 +7,7 @@ export namespace Designer {
 
     export const playButton: Sprite = new Sprite()
 
-    export const playText: Text = new Text("PRESS\nANYWHERE\nTO PLAY")
+    export const playText: Text = new Text("PRESS ANYWHERE\nTO PLAY")
 
     // PLAY SCREEN
 
@@ -33,6 +33,10 @@ export namespace Designer {
 
     export const balanceText: Text = new Text("")
 
+    export const leftTrigger: Sprite = new Sprite()
+
+    export const rightTrigger: Sprite = new Sprite()
+
     // END SCREEN
 
     export const endScreen: Container = new Container()
@@ -43,7 +47,7 @@ export namespace Designer {
 
     export const skipButton: Sprite = new Sprite()
 
-    export const hintText: Text = new Text("(PRESS\nANYWHERE\nTO SKIP)")
+    export const hintText: Text = new Text("(PRESS ANYWHERE\nTO SKIP)")
 
     export function init(): void {
         const scaleFactor: number = window.app.screen.width / 320
@@ -89,6 +93,8 @@ export namespace Designer {
         playScreen.addChild(leftColor)
         playScreen.addChild(rightColor)
         playScreen.addChild(balanceText)
+        playScreen.addChild(leftTrigger)
+        playScreen.addChild(rightTrigger)
 
         buttonLeft.texture = Texture.WHITE
         buttonLeft.anchor.set(0.5)
@@ -110,11 +116,11 @@ export namespace Designer {
 
         wallLeft.texture = Texture.WHITE
         wallLeft.tint = 0x000000
-        wallLeft.anchor.set(0.5)
+        wallLeft.anchor.set(0.5, 1)
         wallLeft.width = window.app.screen.width / 32
-        wallLeft.height = window.app.screen.height
+        wallLeft.height = window.app.screen.height * 100
         wallLeft.x = wallLeft.width / 2
-        wallLeft.y = window.app.screen.height / 2
+        wallLeft.y = window.app.screen.height
 
         wallCenter.texture = Texture.WHITE
         wallCenter.tint = 0x000000
@@ -126,11 +132,11 @@ export namespace Designer {
 
         wallRight.texture = Texture.WHITE
         wallRight.tint = 0x000000
-        wallRight.anchor.set(0.5)
+        wallRight.anchor.set(0.5, 1)
         wallRight.width = window.app.screen.width / 32
-        wallRight.height = window.app.screen.height
+        wallRight.height = window.app.screen.height * 100
         wallRight.x = window.app.screen.width - wallRight.width / 2
-        wallRight.y = window.app.screen.height / 2
+        wallRight.y = window.app.screen.height
 
         hood.texture = Texture.WHITE
         hood.tint = 0x000000
@@ -177,6 +183,22 @@ export namespace Designer {
             fill: 0xFFFFFF,
         })
         balanceText.zIndex = 2
+
+        leftTrigger.texture = Texture.WHITE
+        leftTrigger.anchor.set(0.5)
+        leftTrigger.x = window.app.screen.width * 1 / 4
+        leftTrigger.y = statsBg.y
+        leftTrigger.width = (window.app.screen.width / 2) * 0.9
+        leftTrigger.height = statsBg.height * 1 / 2
+        leftTrigger.alpha = 0
+
+        rightTrigger.texture = Texture.WHITE
+        rightTrigger.anchor.set(0.5)
+        rightTrigger.x = window.app.screen.width * 3 / 4
+        rightTrigger.y = statsBg.y
+        rightTrigger.width = (window.app.screen.width * 1 / 2) * 0.9
+        rightTrigger.height = statsBg.height * 1 / 2
+        rightTrigger.alpha = 0
 
         endScreen.addChild(endText)
         endScreen.addChild(timeText)

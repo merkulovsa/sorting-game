@@ -49,4 +49,24 @@ export namespace MathUtils {
 
         return arr
     }
+
+    export function clamp(value: number, min: number, max: number): number {
+        return Math.min(Math.max(value, min), max)
+    }
+
+    export function clamp01(value: number): number {
+        return clamp(value, 0, 1)
+    }
+
+    export function clampNegative(value: number) {
+        return clamp(value, -Infinity, 0)
+    }
+
+    export function clampPositive(value: number) {
+        return clamp(value, 0, Infinity)
+    }
+
+    export function distance(x1: number, y1: number, x2: number, y2: number): number {
+        return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+    }
 }
